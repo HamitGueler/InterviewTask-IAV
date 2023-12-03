@@ -10,8 +10,12 @@ public class Player {
     public Player(String name) {
         this.name = name;
         frames = new Frames[10];
+        boolean isLastFrame = false;
         for (int i = 0; i < 10; i++) {
-            this.frames[i] = new Frames();
+            if(i == 9){
+                isLastFrame = true;
+            }
+            this.frames[i] = new Frames(isLastFrame);
         }
     }
 }

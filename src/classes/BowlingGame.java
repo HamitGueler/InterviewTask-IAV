@@ -4,6 +4,7 @@ import java.util.Scanner;
 
 public class BowlingGame {
     private Player player;
+    public static int MAX_THROWS = 2;
 
     /**
      * Konstruktor für die Klasse BowlingGame.
@@ -52,9 +53,17 @@ public class BowlingGame {
             boolean hasFrameSpareBonus = this.player.frames[j].getSpareBonus() > 0 ? true : false;
             boolean hasFrameStrikeBonus = this.player.frames[j].getStrikeBonus() > 0 ? true : false;
             String scoreDisplay = (hasFrameSpareBonus == true || hasFrameStrikeBonus == true) ? "S" : String.valueOf(this.player.frames[j].getScore());
-            System.out.printf("%-8s|%-10s|%-10s|%-10s|\n",
-                    (j + 1) + ".FRAME", "1.Wurf: " + firstThrowDisplay, "2.Wurf: " + secondThrowDisplay,
-                    "SCORE: " + scoreDisplay);
+            if (j == 9) {
+                secondThrowDisplay = (secondThrow == 10) ? "X" : (firstThrow + secondThrow == 10) ? "/" : String.valueOf(secondThrow);
+                int thirdThrow = this.player.frames[j].getThrow(2);
+                String thirdThrowDisplay = (thirdThrow == 10) ? "X" : String.valueOf(thirdThrow);
+    
+                System.out.printf("%-10s|%-10s|%-10s|%-10s|%-10s|\n",
+                        (j + 1) + ".FRAME", "1.Wurf: " + firstThrowDisplay, "2.Wurf: " + secondThrowDisplay, "3.Wurf: " + thirdThrowDisplay, "SCORE: " + scoreDisplay);
+            } else {
+                System.out.printf("%-8s|%-10s|%-10s|%-10s|\n",
+                        (j + 1) + ".FRAME", "1.Wurf: " + firstThrowDisplay, "2.Wurf: " + secondThrowDisplay, "SCORE: " + scoreDisplay);
+            }
         }
         System.out.print("------------------------------------------------------------\n");
     }
@@ -99,7 +108,7 @@ public class BowlingGame {
 
         // Wenn erster Wurf noch nicht geworfen wurde
         if (this.player.frames[currentFrame].getThrow(0) == -1) {
-            if (checkStrike(currentFrame, knockedDownPins) == true) {
+            if (checkStrike(currentFrame, knockedDownPins) == true && currentFrame < 9) {
                 System.out.println("GLÜCKWUNSCH DU HAST EINEN STRIKE!!!");
                 this.player.frames[currentFrame].setStrikeBonus(2);
                 this.player.frames[currentFrame].setThrow(knockedDownPins, 0);
@@ -108,15 +117,19 @@ public class BowlingGame {
             }
             this.player.frames[currentFrame].setThrow(knockedDownPins, 0);
             this.player.frames[currentFrame].setScore(prevScore + this.player.frames[currentFrame].getThrow(0));
-            // Wenn zweiter Wurf noch nicht geworfen wurde
+        // Wenn zweiter Wurf noch nicht geworfen wurde
         } else if (this.player.frames[currentFrame].getThrow(1) == -1) {
-            if (checkSpare(currentFrame, knockedDownPins) == true) {
+            if (checkSpare(currentFrame, knockedDownPins) == true && currentFrame < 9) {
                 System.out.println("GUT GEMACHT DU HAST EINEN SPARE!!!");
                 this.player.frames[currentFrame].setSpareBonus(1);
             }
             this.player.frames[currentFrame].setThrow(knockedDownPins, 1);
             this.player.frames[currentFrame].setScore(prevScore + this.player.frames[currentFrame].getThrow(0)
                     + this.player.frames[currentFrame].getThrow(1));
+        // Wenn der Spieler in der letzten Runde ist und den dritten Wurf wirft
+        }else if(currentFrame == 9 && this.player.frames[currentFrame].getThrow(2) == -1){
+            this.player.frames[currentFrame].setScore(prevScore + this.player.frames[currentFrame].getThrow(0) + this.player.frames[currentFrame].getThrow(1) + knockedDownPins);
+            this.player.frames[currentFrame].setThrow(knockedDownPins, 2);
         }
         return false;
     }
@@ -133,7 +146,11 @@ public class BowlingGame {
             System.out.print("------------------------------------------------------------\n");
             System.out.print((currentFrame + 1) + ".Runde: \n");
 
-            for (int bowlingThrows = 0; bowlingThrows < 2; bowlingThrows++) {
+            if (currentFrame+1 == 10) {
+                MAX_THROWS = 3;
+            }
+
+            for (int bowlingThrows = 0; bowlingThrows < MAX_THROWS; bowlingThrows++) {
                 System.out.print((bowlingThrows + 1)
                         + ".Wurf - Wie viele Kegel hast du umgestoßen (|1|2]3|4|5|6|7|8|9|10|): \n");
                 int knockedDownPins = Integer.parseInt(scanner.nextLine());

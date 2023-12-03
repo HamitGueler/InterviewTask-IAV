@@ -11,10 +11,14 @@ public class Frames {
     /**
      * Konstruktor für die Klasse Frame.
      */
-    public Frames() {
+    public Frames(boolean isLastFrame) {
+        int maxThrows = 2;
+        if(isLastFrame == true){
+            maxThrows = 3;
+        }
 
-        this.bowlingThrows = new int[2];
-        for(int i = 0; i < 2; i++){
+        this.bowlingThrows = new int[maxThrows];
+        for(int i = 0; i < maxThrows; i++){
             this.bowlingThrows[i] = -1;
         }
         this.strikeBonus = 0;
