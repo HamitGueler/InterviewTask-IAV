@@ -49,7 +49,9 @@ public class BowlingGame {
             int secondThrow = this.player.frames[j].getThrow(1);
             String secondThrowDisplay = (firstThrow + secondThrow == 10) ? "/" : String.valueOf(secondThrow);
 
-            String scoreDisplay = String.valueOf(this.player.frames[j].getScore());
+            boolean hasFrameSpareBonus = this.player.frames[j].getSpareBonus() > 0 ? true : false;
+            boolean hasFrameStrikeBonus = this.player.frames[j].getStrikeBonus() > 0 ? true : false;
+            String scoreDisplay = (hasFrameSpareBonus == true || hasFrameStrikeBonus == true) ? "S" : String.valueOf(this.player.frames[j].getScore());
             System.out.printf("%-8s|%-10s|%-10s|%-10s|\n",
                     (j + 1) + ".FRAME", "1.Wurf: " + firstThrowDisplay, "2.Wurf: " + secondThrowDisplay,
                     "SCORE: " + scoreDisplay);
@@ -71,7 +73,8 @@ public class BowlingGame {
 
         // Berechnung der Bonuspunkte für Spares des vorherigen Frames
         if (currentFrame - 1 >= 0 && this.player.frames[currentFrame - 1].getSpareBonus() == 1) {
-            this.player.frames[currentFrame - 1].setSpareBonus(this.player.frames[currentFrame - 1].getSpareBonus() - 1);
+            this.player.frames[currentFrame - 1]
+                    .setSpareBonus(this.player.frames[currentFrame - 1].getSpareBonus() - 1);
             this.player.frames[currentFrame - 1].setScore(prevScore + knockedDownPins);
             prevScore = this.player.frames[currentFrame - 1].getScore();
         }
@@ -80,19 +83,23 @@ public class BowlingGame {
         if (currentFrame - 2 >= 0 && this.player.frames[currentFrame - 2].getStrikeBonus() > 0) {
             this.player.frames[currentFrame - 2]
                     .setStrikeBonus(this.player.frames[currentFrame - 2].getStrikeBonus() - 1);
-            this.player.frames[currentFrame - 2].setScore(this.player.frames[currentFrame - 2].getScore() + knockedDownPins);
+            this.player.frames[currentFrame - 2]
+                    .setScore(this.player.frames[currentFrame - 2].getScore() + knockedDownPins);
+            this.player.frames[currentFrame - 1].setScore(
+                    this.player.frames[currentFrame - 2].getScore() + this.player.frames[currentFrame - 1].getThrow(0));
         }
-    
+
         if (currentFrame - 1 >= 0 && this.player.frames[currentFrame - 1].getStrikeBonus() > 0) {
             this.player.frames[currentFrame - 1]
                     .setStrikeBonus(this.player.frames[currentFrame - 1].getStrikeBonus() - 1);
-            this.player.frames[currentFrame - 1].setScore(this.player.frames[currentFrame - 1].getScore() + knockedDownPins);
+            this.player.frames[currentFrame - 1]
+                    .setScore(this.player.frames[currentFrame - 1].getScore() + knockedDownPins);
             prevScore = this.player.frames[currentFrame - 1].getScore();
         }
 
         // Wenn erster Wurf noch nicht geworfen wurde
         if (this.player.frames[currentFrame].getThrow(0) == -1) {
-            if (checkStrike(currentFrame, knockedDownPins) == true){
+            if (checkStrike(currentFrame, knockedDownPins) == true) {
                 System.out.println("GLÜCKWUNSCH DU HAST EINEN STRIKE!!!");
                 this.player.frames[currentFrame].setStrikeBonus(2);
                 this.player.frames[currentFrame].setThrow(knockedDownPins, 0);
@@ -101,7 +108,7 @@ public class BowlingGame {
             }
             this.player.frames[currentFrame].setThrow(knockedDownPins, 0);
             this.player.frames[currentFrame].setScore(prevScore + this.player.frames[currentFrame].getThrow(0));
-        // Wenn zweiter Wurf noch nicht geworfen wurde
+            // Wenn zweiter Wurf noch nicht geworfen wurde
         } else if (this.player.frames[currentFrame].getThrow(1) == -1) {
             if (checkSpare(currentFrame, knockedDownPins) == true) {
                 System.out.println("GUT GEMACHT DU HAST EINEN SPARE!!!");
@@ -113,7 +120,6 @@ public class BowlingGame {
         }
         return false;
     }
-
 
     /**
      * Hauptfunktion.
